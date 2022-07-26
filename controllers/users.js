@@ -44,28 +44,24 @@ const createUser = (req, res) => {
 
 const updateUser = (req, res) => {
   const { name, about } = req.body;
-  User.updateByIdUser(
-    req.user._id,
-    {
-      name,
-      about,
-    },
-    {
-      new: true,
-      runValidators: true,
-      upsert: true,
-    },
-  )
+  User.updateByIdUser(req.user._id, { name, about }, {
+    new: true,
+    runValidators: true,
+    upsert: false,
+  })
     .then((user) => {
+      if (!user) {
+        res.status(404).send({ message: 'Пользователь не найден' });
+        return;
+      }
       res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(400)
-          .send({ message: 'Переданы некорректные данные при обновлении профиля.' });
+        res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
+        return;
       }
-      return res.status(500).send({ message: 'Ошибка по умолчанию.' });
+      res.status(500).send({ message: 'Ошибка по умолчанию.' });
     });
 };
 
