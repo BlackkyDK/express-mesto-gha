@@ -71,20 +71,22 @@ const updateAvatar = (req, res) => {
     {
       new: true,
       runValidators: true,
-      upsert: true,
+      upsert: false,
     },
   )
     .then((user) => {
+      if (!user) {
+        res.status(404).send({ message: '404 — Пользователь с указанным _id не найден.' });
+        return;
+      }
       res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(400)
-          .send({ message: 'Переданы некорректные данные при обновлении аватара.' });
+        res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
+        return;
       }
-
-      return res.status(500).send({ message: 'Ошибка по умолчанию.' });
+      res.status(500).send({ message: 'ошибка ум' });
     });
 };
 
