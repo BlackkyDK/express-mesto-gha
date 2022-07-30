@@ -2,14 +2,10 @@ const User = require('../models/user');
 
 const getUsers = (req, res) => {
   User.find({})
-    .then((user) => {
-      if (user.length === 0) {
-        res.status(400).send({ message: 'Переданы некорректные данные пользователя.' });
-        return;
-      }
-      res.status(200).send(user);
-    })
-    .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию.' }));
+    .then((users) => res.send({ data: users }))
+    .catch(() => {
+      res.status(500).send({ message: 'Ошибка по умолчанию.' });
+    });
 };
 
 const getUserId = (req, res) => {

@@ -2,11 +2,9 @@ const Card = require('../models/card');
 
 const getCards = (req, res) => {
   Card.find({})
-    .then((card) => res.send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании карточки.' });
-      } res.status(500).send({ message: 'Ошибка по умолчанию.' });
+    .then((cards) => res.send({ data: cards }))
+    .catch(() => {
+      res.status(500).send({ message: 'Ошибка по умолчанию.' });
     });
 };
 
