@@ -6,26 +6,27 @@ const bodyParser = require('body-parser');
 const app = express();
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost:27017/myDB', {
-  useNewUrlParser: true,
-});
+mongoose.connect('mongodb://localhost:27017/myDB');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
   res.status(200);
-  res.send('Hello 123crtyrturid');
+  res.send('Hello');
 });
 
 app.use((req, res, next) => {
-  console.log('12345123412');
   req.user = { _id: '62dee506a7aff95bb45c420d' };
   next();
 });
 
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
+
+app.use((req, res) => {
+  res.status(404).send({ message: 'Страница не найдена' });
+});
 
 app.listen(PORT, () => {
   console.log('сервер Express запущен');
