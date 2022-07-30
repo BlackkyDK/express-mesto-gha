@@ -2,31 +2,29 @@ const User = require('../models/user');
 
 const getUsers = (req, res) => {
   User.find({})
-    .then((users) => {
-      if (users.length === 0) {
+    .then((user) => {
+      if (user.length === 0) {
         res.status(400).send({ message: 'Переданы некорректные данные.' });
         return;
       }
-      res.status(200).send(users);
+      res.status(200).send(user);
     })
     .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию.' }));
 };
 
-const getUserId = (req, res, next) => {
+const getUserId = (req, res) => {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        next(404);
-      } else {
-        res.send({ data: user });
+        return res.status(404)
+          .send({ message: 'Пользователь по указанному _id не найден' });
       }
+      return res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(400);
-      } else {
-        next();
-      }
+        return res.status(400).send({ message: 'Переданы некорректные данные _id.' });
+      } return res.status(500).send({ message: 'Ошибка по умолчанию.' });
     });
 };
 
