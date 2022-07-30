@@ -17,14 +17,14 @@ const getUserId = (req, res) => {
     .then((user) => {
       if (!user) {
         res
-          .status(404)
+          .status(400)
           .send({ message: 'Пользователь по указанному _id не найден' });
       } else {
-        res.send({ data: user });
+        res.status(200).send(user);
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') { res.status(400).send({ message: 'Отправлены некорректные данные' }); } else {
+      if (err.name === 'CastError') { res.status(404).send({ message: 'Отправлены некорректные данные' }); } else {
         res.status(500).send({ message: 'Ошибка по умолчанию.' });
       }
     });
