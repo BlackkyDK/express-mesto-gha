@@ -4,7 +4,7 @@ const getUsers = (req, res) => {
   User.find({})
     .then((users) => {
       if (users.length === 0) {
-        res.status(404).send({ message: 'Переданы некорректные данные.' });
+        res.status(400).send({ message: 'Переданы некорректные данные.' });
         return;
       }
       res.status(200).send(users);
@@ -12,21 +12,21 @@ const getUsers = (req, res) => {
     .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию.' }));
 };
 
-const getUserId = (req, res) => {
+const getUserId = (req, res, next) => {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        res.status(404)
-          .send({ message: 'Пользователь по указанному _id не найден' });
+        next(404);
+      } else {
+        res.send({ data: user });
       }
-      res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: ' _id.' });
-        return;
+        next(400);
+      } else {
+        next();
       }
-      res.status(500).send({ message: 'Ошибка по умолчанию.' });
     });
 };
 
