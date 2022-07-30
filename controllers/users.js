@@ -44,49 +44,38 @@ const createUser = (req, res) => {
 
 const updateUser = (req, res) => {
   const { name, about } = req.body;
-  User.updateByIdUser(req.user._id, { name, about }, {
-    new: true,
-    runValidators: true,
-    upsert: false,
-  })
+  User.updateByIdUser(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
-      res.status(200).send(user);
+      if (!user) {
+        res.status(404).send({ message: 'Пользователь с таким _id не найден.' });
+      } else {
+        res.send({ data: user });
+      }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(404).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
-        return;
+        res.status(400).send({ message: 'Переданы некорректные данные пользователя.' });
+      } else {
+        res.status(500).send({ message: 'Ошибка по умолчанию.' });
       }
-      res.status(500).send({ message: 'Ошибка по умолчанию.' });
     });
 };
 
 const updateAvatar = (req, res) => {
   const { avatar } = req.body;
-  User.updateByIdAvatar(
-    req.user._id,
-    {
-      avatar,
-    },
-    {
-      new: true,
-      runValidators: true,
-      upsert: false,
-    },
-  )
+  User.updateByIdAvatar(req.user._id, { avatar }, { new: true })
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: '404 — Пользователь с указанным _id не найден.' });
-        return;
-      }
-      res.status(200).send(user);
+        res.status(404).send({ message: 'Пользователь с таким id не найден' });
+      } else { res.send({ data: user }); }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
-        return;
+        res.status(400)
+          .send({ message: 'Переданы некорректные данные при обновлении аватара' });
+      } else {
+        res.status(500).send({ message: 'Ошибка по умолчанию.' });
       }
-      res.status(500).send({ message: 'ошибка ум' });
     });
 };
 
