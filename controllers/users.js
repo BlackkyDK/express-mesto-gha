@@ -12,18 +12,22 @@ const getUsers = (req, res) => {
     .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию.' }));
 };
 
-const getUser = (req, res) => {
+const getUserId = (req, res) => {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
         res
           .status(404)
           .send({ message: 'Пользователь по указанному _id не найден' });
-        return;
+      } else {
+        res.send({ data: user });
       }
-      res.status(200).send(user);
     })
-    .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию.' }));
+    .catch((err) => {
+      if (err.name === 'CastError') { res.status(400).send({ message: 'Отправлены некорректные данные' }); } else {
+        res.status(500).send({ message: 'Ошибка по умолчанию.' });
+      }
+    });
 };
 
 const createUser = (req, res) => {
@@ -81,7 +85,7 @@ const updateAvatar = (req, res) => {
 
 module.exports = {
   getUsers,
-  getUser,
+  getUserId,
   createUser,
   updateUser,
   updateAvatar,
