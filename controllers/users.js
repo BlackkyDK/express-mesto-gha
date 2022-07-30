@@ -4,7 +4,7 @@ const getUsers = (req, res) => {
   User.find({})
     .then((user) => {
       if (user.length === 0) {
-        res.status(400).send({ message: 'Переданы некорректные данные.' });
+        res.status(400).send({ message: 'Переданы некорректные данные пользователя.' });
         return;
       }
       res.status(200).send(user);
@@ -17,13 +17,13 @@ const getUserId = (req, res) => {
     .then((user) => {
       if (!user) {
         return res.status(404)
-          .send({ message: 'Пользователь по указанному _id не найден' });
+          .send({ message: 'Пользователь по указанному _id не найден.' });
       }
       return res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные _id.' });
+      if (err.kind === 'ObjectId') {
+        return res.status(400).send({ message: 'Переданы некорректные данные пользователя _id.' });
       } return res.status(500).send({ message: 'Ошибка по умолчанию.' });
     });
 };
