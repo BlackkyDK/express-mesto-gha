@@ -4,7 +4,7 @@ const getUsers = (req, res) => {
   User.find({})
     .then((users) => {
       if (users.length === 0) {
-        res.status(400).send({ message: 'Переданы некорректные данные.' });
+        res.status(404).send({ message: 'Переданы некорректные данные.' });
         return;
       }
       res.status(200).send(users);
