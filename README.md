@@ -1,9 +1,10 @@
 [![Tests](https://github.com/yandex-praktikum/express-mesto-gha/actions/workflows/tests-13-sprint.yml/badge.svg)](https://github.com/yandex-praktikum/express-mesto-gha/actions/workflows/tests-13-sprint.yml) [![Tests](https://github.com/yandex-praktikum/express-mesto-gha/actions/workflows/tests-14-sprint.yml/badge.svg)](https://github.com/yandex-praktikum/express-mesto-gha/actions/workflows/tests-14-sprint.yml)
 # Проект Mesto бэкенд
-Проект 13: Место на express-сервере.
-Работа тринадцатого спринта Яндекс.Практикума Клементьевой Галины.
+Проект 14: Место на express-сервере.
+Работа четырнадцатого спринта Яндекс.Практикума Клементьевой Галины.
 
 Самостоятельно создана на базе тренажера по теме Express.
+Добавлена регистрация пользователей по почте и паролю.
 
 ## Настройка бейджей статуса тестов
 
