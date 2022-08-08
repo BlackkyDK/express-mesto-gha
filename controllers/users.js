@@ -113,7 +113,7 @@ const login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'super-secret', { expiresIn: '7d' });
       if (!user) {
-        next(new BadRequest('Пользователь не найден.'));
+        next(new NotFound('Пользователь не найден.'));
       }
       res.send({ token });
     })
