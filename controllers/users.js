@@ -83,8 +83,7 @@ const updateAvatar = (req, res, next) => {
     .then((user) => {
       if (!user) {
         next(new NotFound('Пользователь с таким _id не найден.'));
-      }
-      return res.send({ data: user });
+      } else res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
