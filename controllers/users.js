@@ -20,9 +20,8 @@ const getUserId = (req, res, next) => {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        return next(new NotFound('Пользователь по указанному _id не найден.'));
-      }
-      return res.status(200).send(user);
+        next(new NotFound('Пользователь по указанному _id не найден.'));
+      } else res.send(user);
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
@@ -67,13 +66,13 @@ const updateUser = (req, res, next) => {
       if (!user) {
         next(new NotFound('Пользователь с таким _id не найден.'));
       }
-      return res.send({ data: user });
+      res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequest('Переданы некорректные данные пользователя.'));
       }
-      return next(err);
+      next(err);
     });
 };
 
@@ -82,15 +81,10 @@ const updateAvatar = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        next(new NotFound('Пользователь с таким _id не найден.'));
-      } else res.send({ data: user });
+        next(new NotFound('Пользователь не найден.'));
+      } else res.send(user);
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequest('Переданы некорректные данные при обновлении аватара'));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
 const getCurrentUser = (req, res, next) => {
