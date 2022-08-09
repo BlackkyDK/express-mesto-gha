@@ -1,17 +1,17 @@
 const express = require('express');
-
-const { PORT = 3000 } = process.env;
 const bodyParser = require('body-parser');
 
-const app = express();
+const { errors, celebrate, Joi } = require('celebrate');
 const mongoose = require('mongoose');
 
-const { errors, celebrate, Joi } = require('celebrate');
 const auth = require('./middlewares/auth');
 
-const { createUser, login } = require('./controllers/users');
-
 const NotFound = require('./errors/NotFound');
+
+const app = express();
+const { PORT = 3000 } = process.env;
+
+const { createUser, login } = require('./controllers/users');
 
 mongoose.connect('mongodb://localhost:27017/myDB');
 
@@ -41,7 +41,6 @@ app.post('/signup', celebrate({
 }), createUser);
 
 app.use(auth);
-app.use(errors());
 
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
@@ -49,7 +48,8 @@ app.use('/', require('./routes/cards'));
 app.post('/signin', login);
 app.post('/signup', createUser);
 
-app.use((err, _, res, next) => {
+app.use(errors());
+app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
 
   res.status(statusCode).send({ message: statusCode === 500 ? 'Ошибка по умолчанию.' : message });
