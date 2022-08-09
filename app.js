@@ -49,14 +49,16 @@ app.post('/signin', login);
 app.post('/signup', createUser);
 
 app.use(errors());
+app.use((req, res, next) => {
+  next(new NotFound('Страница не найдена'));
+});
+
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
 
   res.status(statusCode).send({ message: statusCode === 500 ? 'Ошибка по умолчанию.' : message });
   next();
 });
-
-app.use('*', (req, res, next) => next(new NotFound('Страница не найдена')));
 
 app.listen(PORT, () => {
   console.log('сервер Express запущен');
