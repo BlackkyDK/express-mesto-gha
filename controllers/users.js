@@ -37,17 +37,17 @@ const createUser = (req, res, next) => {
   return bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
-    }))
-    .then((user) => {
-      res.status(201).send({
-        data: {
-          name: user.name,
-          about: user.about,
-          avatar: user.avatar,
-          email: user.email,
-        },
-      });
     })
+      .then((user) => {
+        res.status(201).send({
+          data: {
+            name: user.name,
+            about: user.about,
+            avatar: user.avatar,
+            email: user.email,
+          },
+        });
+      }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return next(new Conflict('Такой email уже занят'));
