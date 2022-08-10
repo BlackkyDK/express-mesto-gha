@@ -108,7 +108,7 @@ const login = (req, res, next) => {
       if (!user) {
         next(new NotFound('Пользователь не найден.'));
       }
-      res.send({ token });
+      res.status(200).send({ token });
     })
     .catch(() => next(new AuthError('Неверные почта или пароль')));
 };
