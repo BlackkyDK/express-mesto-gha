@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const auth = require('./middlewares/auth');
 
 const NotFound = require('./errors/NotFound');
+const errorHandler = require('./middlewares/error-handler');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -38,7 +39,7 @@ app.post('/signup', celebrate({
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
-}), createUser);
+}), express.json(), createUser);
 
 app.use(auth);
 
@@ -49,16 +50,12 @@ app.post('/signin', login);
 app.post('/signup', createUser);
 
 app.use(errors());
+
 app.use((req, res, next) => {
   next(new NotFound('Страница не найдена'));
 });
 
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-
-  res.status(statusCode).send({ message: statusCode === 500 ? 'Ошибка по умолчанию.' : message });
-  next();
-});
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log('сервер Express запущен');
