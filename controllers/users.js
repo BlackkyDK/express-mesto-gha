@@ -63,6 +63,9 @@ const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
+      if (!user) {
+        next(new NotFound('Пользователь с таким _id не найден.'));
+      }
       res.send(user);
     })
     .catch((err) => {
