@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 
-const AuthError = require('../errors/AuthError');
 const BadRequest = require('../errors/BadRequest');
 const Conflict = require('../errors/Conflict');
 const NotFound = require('../errors/NotFound');
@@ -37,25 +36,24 @@ const createUser = (req, res, next) => {
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
+    }))
+    .then((user) => {
+      res.status(201).send({
+        data: {
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          email: user.email,
+          _id: user._id,
+        },
+      });
     })
-      .then((user) => {
-        res.status(201).send({
-          data: {
-            name: user.name,
-            about: user.about,
-            avatar: user.avatar,
-            email: user.email,
-          },
-        });
-      }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return next(new Conflict('Такой email уже занят'));
-      }
       if (err.code === 11000) {
-        return next(new BadRequest('Переданы некорректные данные при создании пользователя'));
-      }
-      return next(err);
+        next(new Conflict('Такой email уже занят'));
+      } else if (err.name === 'ValidationError') {
+        next(new BadRequest('Переданы некорректные данные при создании пользователя'));
+      } else next(err);
     });
 };
 
@@ -110,7 +108,7 @@ const login = (req, res, next) => {
       }
       res.status(200).send({ token });
     })
-    .catch(() => next(new AuthError('Неверные почта или пароль')));
+    .catch(next);
 };
 
 module.exports = {
