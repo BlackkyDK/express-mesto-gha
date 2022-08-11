@@ -37,24 +37,25 @@ const createUser = (req, res, next) => {
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
-    }))
-    .then((user) => {
-      res.status(201).send({
-        data: {
-          name: user.name,
-          about: user.about,
-          avatar: user.avatar,
-          email: user.email,
-          _id: user._id,
-        },
-      });
     })
+      .then((user) => {
+        res.status(201).send({
+          data: {
+            name: user.name,
+            about: user.about,
+            avatar: user.avatar,
+            email: user.email,
+          },
+        });
+      }))
     .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return next(new Conflict('Такой email уже занят'));
+      }
       if (err.code === 11000) {
-        next(new Conflict('Такой email уже занят'));
-      } else if (err.name === 'ValidationError') {
-        next(new BadRequest('Переданы некорректные данные при создании пользователя'));
-      } else next(err);
+        return next(new BadRequest('Переданы некорректные данные при создании пользователя'));
+      }
+      return next(err);
     });
 };
 
