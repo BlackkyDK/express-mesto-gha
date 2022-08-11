@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 
+const AuthError = require('../errors/AuthError');
 const BadRequest = require('../errors/BadRequest');
 const Conflict = require('../errors/Conflict');
 const NotFound = require('../errors/NotFound');
@@ -108,7 +109,7 @@ const login = (req, res, next) => {
       }
       res.status(200).send({ token });
     })
-    .catch(next);
+    .catch(() => next(new AuthError('Неверные почта или пароль')));
 };
 
 module.exports = {
