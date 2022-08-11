@@ -2,11 +2,11 @@ const { celebrate, Joi } = require('celebrate');
 
 const validateUserCreate = celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     avatar: Joi.string().pattern(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-._~:/?#[\]@!$&'()*+,;=.]?$/),
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
   }),
 });
 
