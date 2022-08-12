@@ -26,16 +26,21 @@ const deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        throw new NotFound('Карточка с указанным _id не найдена.');
+        next(new NotFound('Карточка с указанным _id не найдена.'));
+      } else if (req.user._id !== card.owner.toString()) {
+        next(new Forbidden('Отсутствуют права для удаления данной карточки'));
       } else {
-        res.send({ data: card });
+        Card.findByIdAndRemove(req.params.cardId).then((removedCard) => {
+          res.send({ data: removedCard });
+        });
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new Forbidden('Переданы некорректные данные карточки'));
+        next(new BadRequest('Переданы некорректные данные карточки'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
