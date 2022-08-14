@@ -16,6 +16,44 @@ const getUsers = (req, res, next) => {
     });
 };
 
+const createUser = (req, res, next) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  User.findOne({ email }).then((user) => {
+    if (user) {
+      throw new Conflict('Пользователь с таким email уже зарегистрирован');
+    } else {
+      bcrypt.hash(password, 10)
+        .then((hash) => User.create({
+          email,
+          password: hash,
+          name,
+          about,
+          avatar,
+        }))
+        .then((userData) => res.status(201).send({
+          email: userData.email,
+          id: userData._id,
+          name: userData.name,
+          about: userData.about,
+          avatar: userData.avatar,
+        }))
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            next(new BadRequest('Переданы некорректные данные при создании пользователя'));
+          }
+          if (err.code === 11000) {
+            next(new Conflict('Такой email уже занят'));
+          }
+          next(err);
+        });
+    }
+  }).catch((err) => {
+    next(err);
+  });
+};
+
 const getUserId = (req, res, next) => {
   User.findById(req.params.id)
     .then((user) => {
@@ -27,35 +65,6 @@ const getUserId = (req, res, next) => {
       if (err.kind === 'ObjectId') {
         return next(new BadRequest('Переданы некорректные данные пользователя _id.'));
       } return next(err);
-    });
-};
-
-const createUser = (req, res, next) => {
-  const {
-    name, about, avatar, email, password,
-  } = req.body;
-  bcrypt.hash(password, 10)
-    .then((hash) => User.create({
-      name, about, avatar, email, password: hash,
-    })
-      .then((user) => {
-        res.status(201).send({
-          data: {
-            name: user.name,
-            about: user.about,
-            avatar: user.avatar,
-            email: user.email,
-          },
-        });
-      }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return next(new Conflict('Такой email уже занят'));
-      }
-      if (err.code === 11000) {
-        return next(new BadRequest('Переданы некорректные данные при создании пользователя'));
-      }
-      return next(err);
     });
 };
 
@@ -115,8 +124,8 @@ const login = (req, res, next) => {
 
 module.exports = {
   getUsers,
-  getUserId,
   createUser,
+  getUserId,
   updateUser,
   updateAvatar,
   getCurrentUser,
