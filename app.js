@@ -24,10 +24,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //   req.user = { _id: '62dee506a7aff95bb45c420d' };
 //   next();
 // });
-
-app.post('/signin', validateUserLogin, login);
-
 app.post('/signup', validateUserCreate, createUser);
+app.post('/signin', validateUserLogin, login);
 
 app.use(auth);
 
