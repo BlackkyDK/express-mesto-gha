@@ -1,6 +1,5 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
 const User = require('../models/user');
 
 const AuthError = require('../errors/AuthError');
@@ -8,30 +7,19 @@ const BadRequest = require('../errors/BadRequest');
 const Conflict = require('../errors/Conflict');
 const NotFound = require('../errors/NotFound');
 
-const getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => res.send({ data: users }))
-    .catch((err) => {
-      next(err);
-    });
-};
-
 const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  User.findOne({ email }).then((user) => {
-    if (user) {
-      throw new Conflict('Пользователь с таким email уже зарегистрирован');
-    } else {
-      bcrypt.hash(password, 10)
-        .then((hash) => User.create({
-          email,
-          password: hash,
-          name,
-          about,
-          avatar,
-        }))
+  bcrypt.hash(password, 10)
+    .then((hash) => {
+      User.create({
+        email,
+        password: hash,
+        name,
+        about,
+        avatar,
+      })
         .then((userData) => res.status(201).send({
           email: userData.email,
           id: userData._id,
@@ -40,18 +28,42 @@ const createUser = (req, res, next) => {
           avatar: userData.avatar,
         }))
         .catch((err) => {
-          if (err.name === 'ValidationError') {
-            next(new BadRequest('Переданы некорректные данные при создании пользователя'));
-          }
           if (err.code === 11000) {
             next(new Conflict('Такой email уже занят'));
+          } else if (err.name === 'ValidationError') {
+            next(new BadRequest('Переданы некорректные данные при создании пользователя'));
+          } else {
+            next(err);
           }
-          next(err);
         });
-    }
-  }).catch((err) => {
-    next(err);
-  });
+    })
+    .catch(next);
+};
+
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'super-secret', { expiresIn: '7d' });
+      if (!email || !password) {
+        next(new AuthError('Некорректный email или пароль.'));
+      }
+      res.cookie('jwt', token, {
+        maxAge: 604800000,
+        httpOnly: true,
+      }).send({ token });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+const getUsers = (req, res, next) => {
+  User.find({})
+    .then((users) => res.send({ data: users }))
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const getUserId = (req, res, next) => {
@@ -80,8 +92,9 @@ const updateUser = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequest('Переданы некорректные данные пользователя.'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -93,7 +106,13 @@ const updateAvatar = (req, res, next) => {
         next(new NotFound('Пользователь не найден.'));
       } else res.send(user);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Переданы некорректные данные пользователя.'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const getCurrentUser = (req, res, next) => {
@@ -107,19 +126,6 @@ const getCurrentUser = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
-};
-
-const login = (req, res, next) => {
-  const { email, password } = req.body;
-  User.findUserByCredentials(email, password)
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'super-secret', { expiresIn: '7d' });
-      if (!user) {
-        next(new NotFound('Пользователь не найден.'));
-      }
-      res.status(200).send({ token });
-    })
-    .catch(() => next(new AuthError('Неверные почта или пароль')));
 };
 
 module.exports = {
