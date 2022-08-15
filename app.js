@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 
 const { errors } = require('celebrate');
 const { validateUserCreate, validateUserLogin } = require('./middlewares/celebrate');
@@ -19,6 +20,7 @@ mongoose.connect('mongodb://localhost:27017/myDB');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // app.use((req, res, next) => {
 //   req.user = { _id: '62dee506a7aff95bb45c420d' };
@@ -29,8 +31,8 @@ app.post('/signin', validateUserLogin, login);
 
 app.use(auth);
 
-app.use('/', require('./routes/users'));
-app.use('/', require('./routes/cards'));
+app.use('/users', require('./routes/users'));
+app.use('/cards', require('./routes/cards'));
 
 app.use(errors());
 
